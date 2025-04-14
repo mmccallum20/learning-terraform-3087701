@@ -93,7 +93,7 @@ module "alb" {
 
    target_groups = {
     ex_ip = {
-      name                              = var.name
+      name                              = "blog-alb"
       protocol                          = "HTTP"
       port                              = 80
       target_type                       = "instance"
