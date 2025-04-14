@@ -79,13 +79,12 @@ module "alb" {
       cidr_ipv4   = "10.0.0.0/16"
     }
   }
-  
-  listener_port = 80
-  listener_protocol = "HTTP"
-  fixed_response_content_type = "text/plain"
-  fixed_response_message_body = "Hello, world!"
-  fixed_response_status_code  = 200
 
+  listener_port = 80
+  listener_protocol = "HTTP"
+  fixed_response_content_type = "text/plain"
+  fixed_response_message_body = "Hello, World!"
+  fixed_response_status_code = 200
 
   target_groups = {
     ex-instance = {
