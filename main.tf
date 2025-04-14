@@ -80,11 +80,21 @@ module "alb" {
     }
   }
 
-  listener_port = 80
-  listener_protocol = "HTTP"
-  fixed_response_content_type = "text/plain"
-  fixed_response_message_body = "Hello, World!"
-  fixed_response_status_code = 200
+  resource "aws_lb_listener" "fixed_response" {
+  load_balancer_arn = aws_lb.my_lb.arn
+  port              = 80
+  protocol          = "HTTP"
+
+  default_action {
+    type = "fixed-response"
+    fixed_response {
+      content_type = "text/plain"
+      message_body = "Fixed response message"
+      status_code  = "200"
+    }
+  }
+}
+
 
   target_groups = {
     ex-instance = {
