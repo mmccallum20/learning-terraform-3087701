@@ -80,21 +80,21 @@ module "alb" {
     }
   }
 
-http_listeners = [
-    {
-      port     = 80
-      protocol = "HTTP"
-      default_action = {
-        type = "fixed-response"
-        fixed_response = {
-          content_type = "text/plain"
-          message_body = "Fixed response message"
-          status_code  = "200"
-        }
-      }
-    }
-  ]
-
+  http_listeners = [
+    {
+      port = 80
+      protocol = "HTTP"
+      default_action = {
+        type = "fixed_response"
+        fixed_response = {
+          content_type = "text/plain"
+          message_body = "Fixed response message"
+          status_code = 200
+        }
+      }
+    }
+  ]
+  
   target_groups = {
     ex-instance = {
       name_prefix      = "blog-"
