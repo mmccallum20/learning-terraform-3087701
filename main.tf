@@ -91,12 +91,12 @@ module "alb" {
     }
   }
 
-  target_groups = {
+  /* target_groups = {
     ex_ip = {
       name                              = var.name
       protocol                          = "HTTP"
       port                              = 80
-      target_type                       = "ip"
+      target_type                       = "instance"
       deregistration_delay              = 5
       load_balancing_cross_zone_enabled = true
 
@@ -110,7 +110,7 @@ module "alb" {
         unhealthy_threshold = "2"
       }
     }
-  }
+  }*/
 
   target_groups = {
     ex-instance = {
