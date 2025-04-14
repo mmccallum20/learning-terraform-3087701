@@ -80,20 +80,37 @@ module "alb" {
     }
   }
 
-  listeners = [
-    {
-      port = 80
+  listeners = {
+    alb_listener = {
+      port     = 80
       protocol = "HTTP"
-      
-      default_action = {
-        fixed_response = {
-          content_type = "text/plain"
-          message_body = "Fixed response message"
-          status_code = 200
-        }
+
+      forward = {
+        target_group_key = "ex_ip"
       }
     }
-  ]
+  }
+
+  target_groups = {
+    ex_ip = {
+      name                              = var.name
+      protocol                          = "HTTP"
+      port                              = 80
+      target_type                       = "ip"
+      deregistration_delay              = 5
+      load_balancing_cross_zone_enabled = true
+
+      health_check = {
+        healthy_threshold   = "3"
+        interval            = "30"
+        protocol            = "HTTP"
+        matcher             = "200"
+        timeout             = "3"
+        path                = "/"
+        unhealthy_threshold = "2"
+      }
+    }
+  }
 
   target_groups = {
     ex-instance = {
