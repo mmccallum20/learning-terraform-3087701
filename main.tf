@@ -91,7 +91,7 @@ module "alb" {
     }
   }
 
-  /* target_groups = {
+   target_groups = {
     ex_ip = {
       name                              = var.name
       protocol                          = "HTTP"
@@ -109,16 +109,6 @@ module "alb" {
         path                = "/"
         unhealthy_threshold = "2"
       }
-    }
-  }*/
-
-  target_groups = {
-    ex-instance = {
-      name_prefix      = "blog-"
-      protocol         = "HTTP"
-      port             = 80
-      target_type      = "instance"
-      target_id        = aws_instance.blog.id
     }
   }
 
