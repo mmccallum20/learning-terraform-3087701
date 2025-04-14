@@ -80,7 +80,7 @@ module "alb" {
     }
   }
 
-  http_listeners = [
+  listeners = [
     {
       port = 80
       protocol = "HTTP"
@@ -94,7 +94,7 @@ module "alb" {
       }
     }
   ]
-  
+
   target_groups = {
     ex-instance = {
       name_prefix      = "blog-"
