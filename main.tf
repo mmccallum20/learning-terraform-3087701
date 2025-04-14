@@ -80,8 +80,8 @@ module "alb" {
     }
   }
   
-  listener_port               = 80
-  listener_protocol           = "HTTP"
+  listener_port = 80
+  listener_protocol = "HTTP"
   fixed_response_content_type = "text/plain"
   fixed_response_message_body = "Hello, world!"
   fixed_response_status_code  = 200
