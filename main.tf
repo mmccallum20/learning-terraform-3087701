@@ -97,6 +97,7 @@ module "alb" {
       protocol                          = "HTTP"
       port                              = 80
       target_type                       = "instance"
+      create_attachment                 = false
       deregistration_delay              = 5
       load_balancing_cross_zone_enabled = true
 
