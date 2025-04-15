@@ -66,13 +66,6 @@ module "autoscaling" {
       heartbeat_timeout     = 60
       lifecycle_transition  = "autoscaling:EC2_INSTANCE_LAUNCHING"
       notification_metadata = jsonencode({ "hello" = "world" })
-    },
-    {
-      name                  = "ExampleTerminationLifeCycleHook"
-      default_result        = "CONTINUE"
-      heartbeat_timeout     = 180
-      lifecycle_transition  = "autoscaling:EC2_INSTANCE_TERMINATING"
-      notification_metadata = jsonencode({ "goodbye" = "world" })
     }
   ]
 }
