@@ -55,7 +55,7 @@ module "autoscaling" {
 
   vpc_zone_identifier = module.blog_vpc.public_subnets
   health_check_type = "EC2"
-  wait_for_capacity_timeout = "0"
+  wait_for_capacity_timeout = 0
   launch_template = {
     id      = aws_launch_template.example.id
     version = "$Latest"
