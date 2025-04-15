@@ -54,6 +54,22 @@ module "autoscaling" {
   # arns means Amazon Resource Numbers, where the traffic is targeted to
 
   vpc_zone_identifier = module.blog_vpc.public_subnets
+  health_check_type    = "EC2"
+  wait_for_capacity_timeout = "0"
+  launch_template = {
+    id      = aws_launch_template.example.id
+    version = "$Latest"
+  }
+
+  scaling_policies = {
+    target_tracking = {
+      predefined_metric_specification = {
+        predefined_metric_type = "ASGAverageCPUUtilization"
+      }
+      target_value = 50.0
+    }
+  }
+
   launch_configuration = aws_launch_configuration.blog_alb.id
   target_group_arns   = [module.blog_alb.target_group_arns]
   security_groups = [module.blog_sg.security_group_id]
@@ -61,6 +77,7 @@ module "autoscaling" {
   image_id           = data.aws_ami.app_ami.id
   instance_type      = var.instance_type
 
+  # copied 
 }
 
 # Creating a Load Balancer using a module 
