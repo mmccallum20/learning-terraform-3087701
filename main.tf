@@ -59,6 +59,7 @@ module "autoscaling" {
   # instance_type = "t2.micro"
   image_id           = data.aws_ami.app_ami.id
   instance_type      = var.instance_type
+  scaling_adjustment = 1 
 
   scaling_policies = {
     target_tracking = {
