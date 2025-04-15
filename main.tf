@@ -61,14 +61,17 @@ module "autoscaling" {
     version = "$Latest"
   }
 
-  scaling_policies = {
-    target_tracking = {
-      predefined_metric_specification = {
-        predefined_metric_type = "ASGAverageCPUUtilization"
-      }
-      target_value = 50.0
-    }
-  }
+  scaling_policies = {
+    target_tracking = {
+      predefined_metric_specification = {
+        predefined_metric_type = "ASGAverageCPUUtilization"
+      }
+      target_value = 50.0
+    }
+  }
+}
+
+
 
   launch_configuration = aws_launch_configuration.blog_alb.id
   target_group_arns   = [module.blog_alb.target_group_arns]
