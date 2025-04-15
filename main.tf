@@ -1,3 +1,5 @@
+# creating an Amazon Machine Image (AMI)
+
 data "aws_ami" "app_ami" {
   most_recent = true
 
@@ -14,9 +16,13 @@ data "aws_ami" "app_ami" {
   owners = ["979382823631"] # Bitnami
 }
 
+# Retrieving information about the default Virtual Private Cloud (VPC) from AWS
+
 data "aws_vpc" "default" {
   default = true
 }
+
+# Creating a blog VPC using a module (a container for specific resource configurations)
 
 module "blog_vpc" {
   source = "terraform-aws-modules/vpc/aws"
@@ -33,22 +39,32 @@ module "blog_vpc" {
   }
 }
 
-resource "aws_instance" "blog" {
-  ami           = data.aws_ami.app_ami.id
-  instance_type = var.instance_type
+# This autoscaling module will replace the original aws_instance (now deleted)
 
-  vpc_security_group_ids = [module.blog_sg.security_group_id]
+module "autoscaling" {
+  source  = "terraform-aws-modules/autoscaling/aws"
+  version = "8.2.0"
+  # insert the 1 required variable here
 
-  subnet_id = module.blog_vpc.public_subnets[0]
+  name = "blog"
+  min_size = 1
+  max_size = 2 
 
-  tags = {
-    Name = "HelloWorld"
-  }
+  # This is how you specify subnets within a autoscaling module 
+  # arns means Amazon Resource Numbers, where the traffic is targeted to
+
+  vpc_zone_identifier = module.blog_vpc.public_subnets
+  target_group_arns   = module.blog_alb.target_group_arns
+  security_groups = [module.blog_sg.security_group_id]
+
+  image_id           = data.aws_ami.app_ami.id
+  instance_type      = var.instance_type
+
 }
 
-# Load Balancer 
+# Creating a Load Balancer using a module 
 
-module "alb" {
+module "blog_alb" {
   source = "terraform-aws-modules/alb/aws"
 
   name    = "blog-alb"
@@ -56,7 +72,8 @@ module "alb" {
   subnets = module.blog_vpc.public_subnets
   security_groups = [module.blog_sg.security_group_id]
 
-  # Security Group
+  # Creating a Security Group within our Load Balancer for security 
+
   security_group_ingress_rules = {
     all_http = {
       from_port   = 80
@@ -79,6 +96,9 @@ module "alb" {
       cidr_ipv4   = "10.0.0.0/16"
     }
   }
+
+  # Creating a listener within our load balancer to watch for traffic and direct it 
+  # to a specific place 
 
   listeners = {
     alb_listener = {
@@ -118,6 +138,8 @@ module "alb" {
     Project     = "Example"
   }
 }
+
+# Creating a security group, using a module  
 
 module "blog_sg" {
   source  = "terraform-aws-modules/security-group/aws"
