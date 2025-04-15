@@ -54,7 +54,7 @@ module "autoscaling" {
   # arns means Amazon Resource Numbers, where the traffic is targeted to
 
   vpc_zone_identifier = module.blog_vpc.public_subnets
-  health_check_type    = "EC2"
+  health_check_type = "EC2"
   wait_for_capacity_timeout = "0"
   launch_template = {
     id      = aws_launch_template.example.id
