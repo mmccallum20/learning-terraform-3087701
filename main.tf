@@ -71,17 +71,13 @@ module "autoscaling" {
   }
 }
 
+  # launch_configuration = aws_launch_configuration.blog_alb.id
+  # target_group_arns   = [module.blog_alb.target_group_arns]
+  # security_groups = [module.blog_sg.security_group_id]
 
-
-   # launch_configuration = aws_launch_configuration.blog_alb.id
-  target_group_arns   = [module.blog_alb.target_group_arns]
-  security_groups = [module.blog_sg.security_group_id]
-
-  image_id           = data.aws_ami.app_ami.id
-  instance_type      = var.instance_type
-
-  # copied 
-}
+  # image_id           = data.aws_ami.app_ami.id
+  # instance_type      = var.instance_type
+# }
 
 # Creating a Load Balancer using a module 
 
