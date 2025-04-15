@@ -59,7 +59,6 @@ module "autoscaling" {
   # instance_type = "t2.micro"
   image_id           = data.aws_ami.app_ami.id
   instance_type      = var.instance_type
-  scaling_adjustment = 1 
 
   scaling_policies = {
     target_tracking = {
@@ -71,12 +70,23 @@ module "autoscaling" {
   }
 }
 
-  # launch_configuration = aws_launch_configuration.blog_alb.id
-  # target_group_arns   = [module.blog_alb.target_group_arns]
-  # security_groups = [module.blog_sg.security_group_id]
+  resource "aws_autoscaling_policy" "scale_up" {
+  name                   = "scale_up"
+  scaling_adjustment     = 1
+  adjustment_type        = "ChangeInCapacity"
+  cooldown               = 300
+  autoscaling_group_name = aws_autoscaling_group.example.name
+  policy_type            = "SimpleScaling"
+}
 
- 
-# }
+resource "aws_autoscaling_policy" "scale_down" {
+  name                   = "scale_down"
+  scaling_adjustment     = -1
+  adjustment_type        = "ChangeInCapacity"
+  cooldown               = 300
+  autoscaling_group_name = aws_autoscaling_group.example.name
+  policy_type            = "SimpleScaling"
+}
 
 # Creating a Load Balancer using a module 
 
@@ -171,3 +181,5 @@ module "blog_sg" {
   egress_rules       = ["all-all"]
   egress_cidr_blocks = ["0.0.0.0/0"]
 }
+
+
