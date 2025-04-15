@@ -73,7 +73,7 @@ module "autoscaling" {
 
 
 
-  launch_configuration = aws_launch_configuration.blog_alb.id
+   # launch_configuration = aws_launch_configuration.blog_alb.id
   target_group_arns   = [module.blog_alb.target_group_arns]
   security_groups = [module.blog_sg.security_group_id]
 
