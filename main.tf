@@ -57,7 +57,7 @@ module "autoscaling" {
   health_check_type = "EC2"
   wait_for_capacity_timeout = "0"
   launch_template = {
-    id      = aws_launch_template.example.id
+    id      = aws_launch_template.example.id
     version = "$Latest"
   }
 
