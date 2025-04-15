@@ -44,48 +44,37 @@ module "blog_vpc" {
 module "autoscaling" {
   source  = "terraform-aws-modules/autoscaling/aws"
   version = "8.2.0"
-  # insert the 1 required variable here
 
   name = "blog"
   min_size = 1
   max_size = 2 
+  desired_capacity          = 1
+  wait_for_capacity_timeout = 0
+  health_check_type         = "EC2"
 
   # This is how you specify subnets within a autoscaling module 
   # arns means Amazon Resource Numbers, where the traffic is targeted to
 
   vpc_zone_identifier = module.blog_vpc.public_subnets
-  health_check_type = "EC2"
-  wait_for_capacity_timeout = 0
-  # instance_type = "t2.micro"
   image_id           = data.aws_ami.app_ami.id
   instance_type      = var.instance_type
 
-  scaling_policies = {
-    target_tracking = {
-      predefined_metric_specification = {
-        predefined_metric_type = "ASGAverageCPUUtilization"
-      }
-      target_value = 50.0
+  initial_lifecycle_hooks = [
+    {
+      name                  = "ExampleStartupLifeCycleHook"
+      default_result        = "CONTINUE"
+      heartbeat_timeout     = 60
+      lifecycle_transition  = "autoscaling:EC2_INSTANCE_LAUNCHING"
+      notification_metadata = jsonencode({ "hello" = "world" })
+    },
+    {
+      name                  = "ExampleTerminationLifeCycleHook"
+      default_result        = "CONTINUE"
+      heartbeat_timeout     = 180
+      lifecycle_transition  = "autoscaling:EC2_INSTANCE_TERMINATING"
+      notification_metadata = jsonencode({ "goodbye" = "world" })
     }
-  }
-}
-
-  resource "aws_autoscaling_policy" "scale_up" {
-  name                   = "scale_up"
-  scaling_adjustment     = 1
-  adjustment_type        = "ChangeInCapacity"
-  cooldown               = 300
-  autoscaling_group_name = aws_autoscaling_group.example.name
-  policy_type            = "SimpleScaling"
-}
-
-resource "aws_autoscaling_policy" "scale_down" {
-  name                   = "scale_down"
-  scaling_adjustment     = -1
-  adjustment_type        = "ChangeInCapacity"
-  cooldown               = 300
-  autoscaling_group_name = aws_autoscaling_group.example.name
-  policy_type            = "SimpleScaling"
+  ]
 }
 
 # Creating a Load Balancer using a module 
