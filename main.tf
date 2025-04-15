@@ -56,6 +56,7 @@ module "autoscaling" {
   vpc_zone_identifier = module.blog_vpc.public_subnets
   health_check_type = "EC2"
   wait_for_capacity_timeout = 0
+  instance_type = "t2.micro"
 
   scaling_policies = {
     target_tracking = {
