@@ -51,7 +51,7 @@ module "autoscaling" {
   # This is how you specify subnets within a autoscaling module 
 
   vpc_zone_identifier = module.blog_vpc.public_subnets
-  target_group_arn = [module.blog_alb.target_group_arns]
+  target_group_arns = module.blog_alb.target_group_arns
   health_check_type         = "EC2"
 
   image_id           = data.aws_ami.app_ami.id
