@@ -51,7 +51,7 @@ module "autoscaling" {
   # This is how you specify subnets within a autoscaling module 
 
   vpc_zone_identifier = module.blog_vpc.public_subnets
-  target_group_arns = [module.autoscaling.target_group_arn[0]]
+  target_group_arns = [module.autoscaling.target_group_arns[0]]
 
   health_check_type         = "EC2"
 
