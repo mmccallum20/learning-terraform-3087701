@@ -57,9 +57,6 @@ module "autoscaling" {
   image_id           = data.aws_ami.app_ami.id
   instance_type      = var.instance_type
   security_groups    = [module.blog_sg.security_group_id]
-  
-  # arns means Amazon Resource Numbers, where the traffic is targeted to
-
 
   initial_lifecycle_hooks = [
     {
@@ -132,7 +129,7 @@ module "blog_alb" {
       protocol                          = "HTTP"
       port                              = 80
       target_type                       = "instance"
-      create_attachment                 = false
+      create_attachment                 = true
       deregistration_delay              = 5
       load_balancing_cross_zone_enabled = true
 
