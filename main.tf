@@ -129,10 +129,10 @@ module "blog_alb" {
       protocol                          = "HTTP"
       port                              = 80
       target_type                       = "instance"
+      target_id                         = module.blog
       create_attachment                 = true
       deregistration_delay              = 5
       load_balancing_cross_zone_enabled = true
-      target_group_arn                  = module.blog_alb.target_group_arn
 
 
       health_check = {
