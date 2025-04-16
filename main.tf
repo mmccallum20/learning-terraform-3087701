@@ -133,7 +133,7 @@ module "blog_alb" {
       vpc_id                            = module.blog_vpc.vpc_id
       target_type                       = "instance"
       # target_group_arn                  = module.autoscaling.target_group_arn
-      create_attachment                 = true
+      create_attachment                 = false
       deregistration_delay              = 5
       load_balancing_cross_zone_enabled = true
 
