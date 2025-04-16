@@ -114,13 +114,11 @@ module "blog_alb" {
 
   listeners = {
     alb_listener = {
-      load_balancer_arn = aws_lb.my_lb.arn
       port     = 80
       protocol = "HTTP"
 
       forward = {
         target_group_key = "ex_ip"
-        target_group_arn = module.blog_alb.target_group_arn
       }
     }
   }
@@ -134,6 +132,8 @@ module "blog_alb" {
       create_attachment                 = true
       deregistration_delay              = 5
       load_balancing_cross_zone_enabled = true
+      target_group_arn                  = module.blog_alb.target_group_arn
+
 
       health_check = {
         healthy_threshold   = "3"
