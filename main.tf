@@ -129,7 +129,7 @@ module "blog_alb" {
       protocol                          = "HTTP"
       port                              = 80
       target_type                       = "instance"
-      target_group_arn                  = module.autoscaler.target_group_arn
+      target_group_arn                  = module.autoscaling.target_group_arn
       create_attachment                 = true
       deregistration_delay              = 5
       load_balancing_cross_zone_enabled = true
