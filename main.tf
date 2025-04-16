@@ -44,28 +44,38 @@ module "blog_vpc" {
 module "autoscaling" {
   source  = "terraform-aws-modules/autoscaling/aws"
   version = "8.2.0"
-
   name = "blog"
   min_size = 1
   max_size = 2 
-  # desired_capacity          = 1
-  wait_for_capacity_timeout = 0
-  health_check_type         = "EC2"
-
+  
   # This is how you specify subnets within a autoscaling module 
-  # arns means Amazon Resource Numbers, where the traffic is targeted to
 
   vpc_zone_identifier = module.blog_vpc.public_subnets
-  image_id           = data.aws_ami.app_ami.id
-  instance_type      = var.instance_type
+  health_check_type         = "EC2"
 
-  initial_lifecycle_hooks = [
+  launch_template = {
+    name = "example launch template"
+    image_id           = data.aws_ami.app_ami.id
+    instance_type      = var.instance_type
+    security_groups    = [module.blog_sg.security_group_id]
+  }
+  
+  # arns means Amazon Resource Numbers, where the traffic is targeted to
+
+  lb_target_group_arn = module.blog_alb.lb_target_group_arn
+
+  lifecycle_hooks = [
     {
       name                  = "ExampleStartupLifeCycleHook"
       default_result        = "CONTINUE"
       heartbeat_timeout     = 60
       lifecycle_transition  = "autoscaling:EC2_INSTANCE_LAUNCHING"
-      notification_metadata = jsonencode({ "hello" = "world" })
+    },
+    {
+      name                  = "ExampleTerminationLifeCycleHook"
+      default_result        = "CONTINUE"
+      heartbeat_timeout     = 180
+      lifecycle_transition  = "autoscaling:EC2_INSTANCE_TERMINATING"
     }
   ]
 }
