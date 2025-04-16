@@ -114,6 +114,7 @@ module "blog_alb" {
 
   listeners = {
     alb_listener = {
+      load_balancer_arn = aws_lb.my_lb.arn
       port     = 80
       protocol = "HTTP"
 
