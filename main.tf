@@ -53,18 +53,15 @@ module "autoscaling" {
   vpc_zone_identifier = module.blog_vpc.public_subnets
   health_check_type         = "EC2"
 
-  launch_template = {
-    name = "example launch template"
-    image_id           = data.aws_ami.app_ami.id
-    instance_type      = var.instance_type
-    security_groups    = [module.blog_sg.security_group_id]
-  }
+  image_id           = data.aws_ami.app_ami.id
+  instance_type      = var.instance_type
+  security_groups    = [module.blog_sg.security_group_id]
   
   # arns means Amazon Resource Numbers, where the traffic is targeted to
 
-  lb_target_group_arn = module.blog_alb.lb_target_group_arn
+  target_group_arns = module.blog_alb.target_group_arns
 
-  lifecycle_hooks = [
+  initial_lifecycle_hooks = [
     {
       name                  = "ExampleStartupLifeCycleHook"
       default_result        = "CONTINUE"
