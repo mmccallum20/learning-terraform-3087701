@@ -51,7 +51,6 @@ module "autoscaling" {
   # This is how you specify subnets within a autoscaling module 
 
   vpc_zone_identifier = module.blog_vpc.public_subnets
-  target_group_arns = [module.autoscaling.target_group_arns[0]]
 
   health_check_type         = "EC2"
 
@@ -132,7 +131,7 @@ module "blog_alb" {
       port                              = 80
       vpc_id                            = module.blog_vpc.vpc_id
       target_type                       = "instance"
-      # target_group_arn                  = module.autoscaling.target_group_arn
+      arn                               = module.autoscaling.target_group_arn
       create_attachment                 = false
       deregistration_delay              = 5
       load_balancing_cross_zone_enabled = true
