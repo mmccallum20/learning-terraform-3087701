@@ -119,8 +119,7 @@ module "blog_alb" {
 
       forward = {
         target_group_key = "ex_ip"
-        target_group_arn = module.autoscaling.target_group_arn
-
+        # target_group_arn = module.autoscaling.target_group_arn
       }
     }
   }
