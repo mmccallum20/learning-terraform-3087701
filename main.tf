@@ -73,6 +73,12 @@ module "autoscaling" {
   ]
 }
 
+resource "aws_autoscaling_attachment" "asg_attachment" {
+  autoscaling_group_name = module.autoscaling.this_autoscaling_group_id
+  alb_target_group_arn   = aws_lb_target_group.blog_tg.arn
+}
+
+
 # Creating a Load Balancer using a module 
 
 module "blog_alb" {
@@ -131,7 +137,6 @@ module "blog_alb" {
       create_attachment                 = true
       deregistration_delay              = 5
       load_balancing_cross_zone_enabled = true
-      vpc_id                            = module.blog_vpc.vpc_id
 
       health_check = {
         healthy_threshold   = "3"
