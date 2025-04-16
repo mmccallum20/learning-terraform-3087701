@@ -131,6 +131,7 @@ module "blog_alb" {
       create_attachment                 = true
       deregistration_delay              = 5
       load_balancing_cross_zone_enabled = true
+      vpc_id                            = module.blog_vpc.vpc_id
 
       health_check = {
         healthy_threshold   = "3"
