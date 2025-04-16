@@ -119,6 +119,8 @@ module "blog_alb" {
 
       forward = {
         target_group_key = "ex_ip"
+        target_group_arn = module.autoscaling.target_group_arn
+
       }
     }
   }
@@ -128,8 +130,9 @@ module "blog_alb" {
       name                              = "blog-alb"
       protocol                          = "HTTP"
       port                              = 80
+      vpc_id                            = module.blog_vpc.vpc_id
       target_type                       = "instance"
-      target_group_arn                  = module.autoscaling.target_group_arn
+      # target_group_arn                  = module.autoscaling.target_group_arn
       create_attachment                 = true
       deregistration_delay              = 5
       load_balancing_cross_zone_enabled = true
