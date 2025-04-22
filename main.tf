@@ -24,14 +24,13 @@ data "aws_vpc" "default" {
 
 # Creating a blog VPC using a module (a container for specific resource configurations)
 
-resource "aws_vpc" "blog_vpc" {
+resource "aws_vpc" "dev" {
   # source = "terraform-aws-modules/vpc/aws"
 
-  name = "dev"
-  cidr = "10.0.0.0/16"
+ # cidr = "10.0.0.0/16"
 
-  azs             = ["us-west-2a", "us-west-2b", "us-west-2c"]
-  public_subnets  = ["10.0.101.0/24", "10.0.102.0/24", "10.0.103.0/24"]
+  # azs             = ["us-west-2a", "us-west-2b", "us-west-2c"]
+  # public_subnets  = ["10.0.101.0/24", "10.0.102.0/24", "10.0.103.0/24"]
 
   tags = {
     Terraform = "true"
@@ -78,7 +77,7 @@ resource "aws_autoscaling_group" "autoscaling" {
 
 resource "aws_launch_configuration" "example" {
   name          = "example-lc"
-  image_id      = module.autoscaling.image_id
+  image_id      = var.aws_autoscaling_group.autoscaling.image_id
   instance_type = var.instance_type
 
   security_groups = [var.aws_security_group.security_group_id]
@@ -100,7 +99,7 @@ resource "aws_lb" "blog_alb" {
   name    = "blog-alb"
   vpc_id  = var.aws_vpc.vpc_id
   subnets = var.aws_vpc.public_subnets
-  security_groups = [module.blog_sg.security_group_id]
+  security_groups = [var.aws_security_group.my_blog_sg.security_group_id]
 
   # Creating a Security Group within our Load Balancer for security 
 
@@ -176,7 +175,7 @@ resource "aws_security_group" "my_blog_sg" {
   # source  = "terraform-aws-modules/security-group/aws"
   version = "5.3.0"
 
-  vpc_id = module.blog_vpc.vpc_id
+  vpc_id = var.aws_vpc.vpc_id
   name = "blog_new"
 
 
