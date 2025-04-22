@@ -24,7 +24,7 @@ data "aws_vpc" "default" {
 
 # Creating a blog VPC using a module (a container for specific resource configurations)
 
-resource "blog_vpc" "my_blog_vpc" {
+resource "aws_vpc" "blog_vpc" {
   # source = "terraform-aws-modules/vpc/aws"
 
   name = "dev"
@@ -50,7 +50,7 @@ resource "aws_autoscaling_group" "autoscaling" {
   
   # This is how you specify subnets within a autoscaling module 
 
-  vpc_zone_identifier = module.blog_vpc.public_subnets
+  vpc_zone_identifier = var.blog_vpc.public_subnets
   target_group_arns = [target_groups.ex_ip.arn]
   launch_configuration = aws_launch_configuration.example.id
 
@@ -58,7 +58,7 @@ resource "aws_autoscaling_group" "autoscaling" {
 
   image_id           = data.aws_ami.app_ami.id
   instance_type      = var.instance_type
-  security_groups    = [module.blog_sg.security_group_id]
+  security_groups    = [var.blog_sg.security_group_id]
 
   initial_lifecycle_hooks = [
     {
@@ -81,7 +81,7 @@ resource "aws_launch_configuration" "example" {
   image_id      = module.autoscaling.image_id
   instance_type = var.instance_type
 
-  security_groups = [module.blog_sg.security_group_id]
+  security_groups = [var.aws_security_group.security_group_id]
 
   lifecycle {
     create_before_destroy = true
@@ -92,14 +92,14 @@ resource "aws_launch_configuration" "example" {
 
 # Creating a Load Balancer using a module 
 
-resource "alb" "my_blog_alb" {
+resource "alb" "blog_alb" {
   # source = "terraform-aws-modules/alb/aws"
   internal = false
   load_balancer_type = "application"
 
   name    = "blog-alb"
-  vpc_id  = module.blog_vpc.vpc_id
-  subnets = module.blog_vpc.public_subnets
+  vpc_id  = var.aws_vpc.vpc_id
+  subnets = var.aws_vpc.public_subnets
   security_groups = [module.blog_sg.security_group_id]
 
   # Creating a Security Group within our Load Balancer for security 
@@ -172,7 +172,7 @@ resource "alb" "my_blog_alb" {
 
 # Creating a security group, using a module  
 
-resource "blog_sg" "my_blog_sg" {
+resource "aws_security_group" "my_blog_sg" {
   # source  = "terraform-aws-modules/security-group/aws"
   version = "5.3.0"
 
