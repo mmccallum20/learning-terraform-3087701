@@ -52,7 +52,7 @@ module "autoscaling" {
 
   vpc_zone_identifier = module.blog_vpc.public_subnets
   target_group_arns = [target_groups.ex_ip.arn]
-  launch_configuration = aws_launch_configuration = aws_launch_configuration.example.id
+  launch_configuration = aws_launch_configuration.example.id
 
   health_check_type         = "EC2"
 
@@ -130,7 +130,7 @@ module "blog_alb" {
   # Creating a listener within our load balancer to watch for traffic and direct it 
   # to a specific place 
 
-  resource "aws_lb_listener" "alb_listener" = {
+  resource "aws_lb_listener" "alb_listener" {
       load_balancer_arn = blog_alb.alb_listener.arn
       port     = 80
       protocol = "HTTP"
@@ -141,7 +141,7 @@ module "blog_alb" {
       }
   }
 
-   resource "target_groups" "ex_ip" = {
+   resource "target_groups" "ex_ip" {
       name                              = "blog-alb"
       protocol                          = "HTTP"
       port                              = 80
