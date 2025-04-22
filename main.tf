@@ -75,6 +75,22 @@ resource "aws_autoscaling_group" "autoscaling" {
   ]
 }
 
+resource "aws_security_group" "my_blog_sg" {
+  # source  = "terraform-aws-modules/security-group/aws"
+  version = "5.3.0"
+
+  vpc_id = var.aws_vpc.vpc_id
+  name = "blog_new"
+
+
+  ingress_rules       = ["http-80-tcp","https-443-tcp"]
+  ingress_cidr_blocks = ["0.0.0.0/0"]
+
+  egress_rules       = ["all-all"]
+  egress_cidr_blocks = ["0.0.0.0/0"]
+}
+
+
 resource "aws_launch_configuration" "example" {
   name          = "example-lc"
   image_id      = var.aws_autoscaling_group.autoscaling.image_id
@@ -170,20 +186,5 @@ resource "aws_lb" "blog_alb" {
 }
 
 # Creating a security group, using a module  
-
-resource "aws_security_group" "my_blog_sg" {
-  # source  = "terraform-aws-modules/security-group/aws"
-  version = "5.3.0"
-
-  vpc_id = var.aws_vpc.vpc_id
-  name = "blog_new"
-
-
-  ingress_rules       = ["http-80-tcp","https-443-tcp"]
-  ingress_cidr_blocks = ["0.0.0.0/0"]
-
-  egress_rules       = ["all-all"]
-  egress_cidr_blocks = ["0.0.0.0/0"]
-}
 
 
