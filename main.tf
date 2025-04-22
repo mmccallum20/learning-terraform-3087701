@@ -92,7 +92,7 @@ resource "aws_launch_configuration" "example" {
 
 # Creating a Load Balancer using a module 
 
-resource "alb" "blog_alb" {
+resource "aws_lb" "blog_alb" {
   # source = "terraform-aws-modules/alb/aws"
   internal = false
   load_balancer_type = "application"
