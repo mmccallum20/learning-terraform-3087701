@@ -24,8 +24,8 @@ data "aws_vpc" "default" {
 
 # Creating a blog VPC using a module (a container for specific resource configurations)
 
-module "blog_vpc" {
-  source = "terraform-aws-modules/vpc/aws"
+resource "blog_vpc" "my_blog_vpc" {
+  # source = "terraform-aws-modules/vpc/aws"
 
   name = "dev"
   cidr = "10.0.0.0/16"
@@ -172,8 +172,8 @@ resource "blog_alb" "my_blog_alb" {
 
 # Creating a security group, using a module  
 
-module "blog_sg" {
-  source  = "terraform-aws-modules/security-group/aws"
+resource "blog_sg" "my_blog_sg" {
+  # source  = "terraform-aws-modules/security-group/aws"
   version = "5.3.0"
 
   vpc_id = module.blog_vpc.vpc_id
