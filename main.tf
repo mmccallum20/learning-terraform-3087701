@@ -42,8 +42,8 @@ module "blog_vpc" {
 # This autoscaling module will replace the original aws_instance (now deleted)
 
 resource "aws_autoscaling_group" "autoscaling" {
-  source  = "terraform-aws-modules/autoscaling/aws"
-  version = "8.2.0"
+  # source  = "terraform-aws-modules/autoscaling/aws"
+  # version = "8.2.0"
   name = "blog"
   min_size = 1
   max_size = 2 
@@ -93,7 +93,7 @@ resource "aws_launch_configuration" "example" {
 # Creating a Load Balancer using a module 
 
 resource "blog_alb" "my_blog_alb" {
-  source = "terraform-aws-modules/alb/aws"
+  # source = "terraform-aws-modules/alb/aws"
   internal = false
   load_balancer_type = "application"
 
