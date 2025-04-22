@@ -51,6 +51,8 @@ module "autoscaling" {
   # This is how you specify subnets within a autoscaling module 
 
   vpc_zone_identifier = module.blog_vpc.public_subnets
+  target_group_arns = [target_groups.ex_ip.arn]
+  launch_configuration = aws_launch_configuration = aws_launch_configuration.example.id
 
   health_check_type         = "EC2"
 
@@ -74,11 +76,26 @@ module "autoscaling" {
   ]
 }
 
+resource "aws_launch_configuration" "example" {
+  name          = "example-lc"
+  image_id      = module.autoscaling.image_id
+  instance_type = var.instance_type
+
+  security_groups = [module.blog_sg.security_group_id]
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+
 
 # Creating a Load Balancer using a module 
 
 module "blog_alb" {
   source = "terraform-aws-modules/alb/aws"
+  internal = false
+  load_balancer_type = "application"
 
   name    = "blog-alb"
   vpc_id  = module.blog_vpc.vpc_id
@@ -113,19 +130,18 @@ module "blog_alb" {
   # Creating a listener within our load balancer to watch for traffic and direct it 
   # to a specific place 
 
-  listeners = {
-    alb_listener = {
+  resource "aws_lb_listener" "alb_listener" = {
+      load_balancer_arn = blog_alb.alb_listener.arn
       port     = 80
       protocol = "HTTP"
 
-      forward = {
-        target_group_key = "ex_ip"
+      default_action {
+        type = forward
+        target_group_arn = aws_lb_listener.alb_listener.arn
       }
-    }
   }
 
-   target_groups = {
-    ex_ip = {
+   resource "target_groups" "ex_ip" = {
       name                              = "blog-alb"
       protocol                          = "HTTP"
       port                              = 80
@@ -142,11 +158,10 @@ module "blog_alb" {
         interval            = "30"
         protocol            = "HTTP"
         matcher             = "200"
-        timeout             = "3"
+        timeout             = "5"
         path                = "/"
         unhealthy_threshold = "2"
       }
-    }
   }
 
   tags = {
