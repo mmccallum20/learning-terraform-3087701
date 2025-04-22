@@ -131,7 +131,7 @@ module "blog_alb" {
       port                              = 80
       vpc_id                            = module.blog_vpc.vpc_id
       target_type                       = "instance"
-      arn                               = module.autoscaling.target_groups["ex_ip"].arn
+      # arn                               = module.autoscaling.target_groups["ex_ip"].arn
       create_attachment                 = false
       deregistration_delay              = 5
       load_balancing_cross_zone_enabled = true
