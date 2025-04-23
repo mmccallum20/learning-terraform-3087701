@@ -6,6 +6,6 @@ module "prod" {
         network_prefix = "10.2"
     }
 
-    min_size = 0
-    max_size = 0
+    min_size = 1
+    max_size = 2
 }
