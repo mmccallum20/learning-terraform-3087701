@@ -16,21 +16,18 @@ data "aws_ami" "app_ami" {
   owners = ["979382823631"] # Bitnami
 }
 
-# Retrieving information about the default Virtual Private Cloud (VPC) from AWS
-
-data "aws_vpc" "default" {
-  default = true
-}
-
 # Creating a blog VPC using a module (a container for specific resource configurations)
 
-resource "aws_vpc" "dev" {
-  # source = "terraform-aws-modules/vpc/aws"
+module "blog_vpc" {
+  source = "terraform-aws-modules/vpc/aws"
 
- # cidr = "10.0.0.0/16"
+  name = "dev"
+  cidr = "10.0.0.0/16"
 
-  # azs             = ["us-west-2a", "us-west-2b", "us-west-2c"]
-  # public_subnets  = ["10.0.101.0/24", "10.0.102.0/24", "10.0.103.0/24"]
+  azs             = ["us-west-2a", "us-west-2b", "us-west-2c"]
+  public_subnets  = ["10.0.101.0/24", "10.0.102.0/24", "10.0.103.0/24"]
+
+  enable_nat_gateway = true 
 
   tags = {
     Terraform = "true"
@@ -38,153 +35,73 @@ resource "aws_vpc" "dev" {
   }
 }
 
-# This autoscaling module will replace the original aws_instance (now deleted)
+module "blog_sg" {
+  source  = "terraform-aws-modules/security-group/aws"
+  version = "4.13.0"
 
-resource "aws_autoscaling_group" "autoscaling" {
-  # source  = "terraform-aws-modules/autoscaling/aws"
-  # version = "8.2.0"
+  vpc_id = module.blog_vpc.vpc_id
+  name = "blog"
+  ingress_rules       = ["http-80-tcp","https-443-tcp"]
+  ingress_cidr_blocks = ["0.0.0.0/0"]
+  egress_rules       = ["all-all"]
+  egress_cidr_blocks = ["0.0.0.0/0"]
+}
+
+module "autoscaling" {
+  source = "terraform-aws-modules/autoscaling/aws"
+  version = "6.5.2"
+
   name = "blog"
   min_size = 1
   max_size = 2 
   
   # This is how you specify subnets within a autoscaling module 
 
-  vpc_zone_identifier = var.blog_vpc.public_subnets
-  target_group_arns = [target_groups.ex_ip.arn]
-  launch_configuration = aws_launch_configuration.example.id
-
-  health_check_type         = "EC2"
+  vpc_zone_identifier = module.blog_vpc.public_subnets
+  target_group_arns   = module.blog_alb.target_group_arns
+  security_groups = [module.blog_sg.security_group_id]
 
   image_id           = data.aws_ami.app_ami.id
   instance_type      = var.instance_type
-  security_groups    = [var.blog_sg.security_group_id]
-
-  initial_lifecycle_hooks = [
-    {
-      name                  = "ExampleStartupLifeCycleHook"
-      default_result        = "CONTINUE"
-      heartbeat_timeout     = 60
-      lifecycle_transition  = "autoscaling:EC2_INSTANCE_LAUNCHING"
-    },
-    {
-      name                  = "ExampleTerminationLifeCycleHook"
-      default_result        = "CONTINUE"
-      heartbeat_timeout     = 180
-      lifecycle_transition  = "autoscaling:EC2_INSTANCE_TERMINATING"
-    }
-  ]
 }
-
-resource "aws_security_group" "my_blog_sg" {
-  # source  = "terraform-aws-modules/security-group/aws"
-  version = "5.3.0"
-
-  vpc_id = var.aws_vpc.vpc_id
-  name = "blog_new"
-
-
-  ingress_rules       = ["http-80-tcp","https-443-tcp"]
-  ingress_cidr_blocks = ["0.0.0.0/0"]
-
-  egress_rules       = ["all-all"]
-  egress_cidr_blocks = ["0.0.0.0/0"]
-}
-
-
-resource "aws_launch_configuration" "example" {
-  name          = "example-lc"
-  image_id      = var.aws_autoscaling_group.autoscaling.image_id
-  instance_type = var.instance_type
-
-  security_groups = [var.aws_security_group.security_group_id]
-
-  lifecycle {
-    create_before_destroy = true
-  }
-}
-
-
 
 # Creating a Load Balancer using a module 
 
-resource "aws_lb" "blog_alb" {
-  # source = "terraform-aws-modules/alb/aws"
-  internal = false
+module "blog_alb" {
+  source = "terraform-aws-modules/alb/aws"
+  version = "~> 6.0"
+
+  name = "blog_alb"
   load_balancer_type = "application"
 
-  name    = "blog-alb"
-  vpc_id  = var.aws_vpc.vpc_id
-  subnets = var.aws_vpc.public_subnets
-  security_groups = [var.aws_security_group.my_blog_sg.security_group_id]
+  vpc_id = module.blog_vpc.vpc_id
+  subnets = module.blog_vpc.public_subnets
+  security_groups = [module.blog_sg.security_group_id]
 
-  # Creating a Security Group within our Load Balancer for security 
-
-  security_group_ingress_rules = {
-    all_http = {
-      from_port   = 80
-      to_port     = 80
-      ip_protocol = "tcp"
-      description = "HTTP web traffic"
-      cidr_ipv4   = "0.0.0.0/0"
-    }
-    all_https = {
-      from_port   = 443
-      to_port     = 443
-      ip_protocol = "tcp"
-      description = "HTTPS web traffic"
-      cidr_ipv4   = "0.0.0.0/0"
-    }
-  }
-  security_group_egress_rules = {
-    all = {
-      ip_protocol = "-1"
-      cidr_ipv4   = "10.0.0.0/16"
-    }
-  }
-
-  # Creating a listener within our load balancer to watch for traffic and direct it 
-  # to a specific place 
-
-  resource "aws_lb_listener" "alb_listener" {
-      load_balancer_arn = blog_alb.alb_listener.arn
-      port     = 80
-      protocol = "HTTP"
-
-      default_action {
-        type = forward
-        target_group_arn = aws_lb_listener.alb_listener.arn
+  target_groups = [
+    {
+      name_prefix      = "blog-"
+      backend_protocol = "HTTP"
+      backend_port     = 80
+      target_type      = "instance"
+      targets = {
+        my_target = {
+          target_id = aws_instance.blog.id
+          port = 80 
+        }
       }
-  }
-
-   resource "target_groups" "ex_ip" {
-      name                              = "blog-alb"
-      protocol                          = "HTTP"
-      port                              = 80
-      vpc_id                            = module.blog_vpc.vpc_id
-      target_type                       = "instance"
-      # arn                               = module.autoscaling.target_groups["ex_ip"].arn
-      create_attachment                 = false
-      deregistration_delay              = 5
-      load_balancing_cross_zone_enabled = true
-
-
-      health_check = {
-        healthy_threshold   = "3"
-        interval            = "30"
-        protocol            = "HTTP"
-        matcher             = "200"
-        timeout             = "5"
-        path                = "/"
-        unhealthy_threshold = "2"
-      }
-  }
+    }
+  ] 
+  
+  http_tcp_listeners = [
+    {
+      port = 80
+      protocol = HTTP 
+      target_group_index = 0
+    }
+  ]
 
   tags = {
     Environment = "dev"
-    Project     = "Example"
   }
 }
-
-# Creating a security group, using a module  
-
-
