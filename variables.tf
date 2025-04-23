@@ -3,26 +3,40 @@ variable "instance_type" {
   default     = "t3.nano"
 }
 
-variable "aws_security_group" {
-  type = list(string)
-  default     = ["default"]
-}
+variable "ami_filter" {
+  description = "Name filter and owner for AMI"
 
-variable "aws_lb" {
-  description = "Configuration for the AWS Application Load Balancer"
-  type = object({
-    name               = string
-    internal           = bool
-    security_groups    = list(string)
-    subnets            = list(string)
-    enable_deletion_protection = bool
+  type = object ({
+    name = string
+    owner = string
   })
+
   default = {
-    name               = "my-load-balancer"
-    internal           = false
-    security_groups    = ["sg-0123456789abcdef0"]
-    subnets            = ["subnet-0123456789abcdef0", "subnet-0123456789abcdef1"]
-    enable_deletion_protection = false
+    name = "bitnami-tomcat-*-x86_64-hvm-ebs-nami"
+    owner = "979382823631" # Bitnami
   }
 }
 
+variable "environment" {
+  description = "Development environment"
+
+  type = object ({
+    name           = string
+    network_prefix = string
+  })
+
+  default = {
+    name = "dev"
+    network_prefix = "10.0"
+  }   
+}
+
+variable "min_size" {
+  description = "Minimum number of instances in the ASG"
+  default = 1
+}
+
+variable "max_size" {
+  description = "Maximum number of instances in the ASG"
+  default = 2
+}
